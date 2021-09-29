@@ -30,9 +30,6 @@ import com.example.cupcakes.model.OrderViewModel
  */
 class FlavorFragment : Fragment() {
 
-    // Binding object instance corresponding to the fragment_flavor.xml layout
-    // This property is non-null between the onCreateView() and onDestroyView() lifecycle callbacks,
-    // when the view hierarchy is attached to the fragment.
     private var binding: FragmentFlavorBinding? = null
 
     // Use the 'by activityViewModels()' Kotlin property delegate from the fragment-ktx artifact
@@ -51,20 +48,27 @@ class FlavorFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding?.apply {
-            // Specify the fragment as the lifecycle owner
+            // Указываем фрагмент как владельца жизненного цикла (lifecycle owner) для правильного
+            // обновления цены в макетах. Т. к. цена является Livedata, а фрагменты - владельцами жизненного цикла (lifecycle owner).
             lifecycleOwner = viewLifecycleOwner
 
-// Присваиваем модель представления свойству в классе привязки
+            //Дополнительная информация о привязке данных:
+            //Напомним, что библиотека привязки данных является частью Android Jetpack .
+            // Привязка данных связывает компоненты пользовательского интерфейса в ваших макетах с источниками данных в вашем приложении
+            // с использованием декларативного формата. Проще говоря, привязка данных - это привязка данных (из кода) к View +
+            // привязка View  к коду. Благодаря настройке этих привязок и автоматическому обновлению
+            // это помогает снизить вероятность ошибок, если вы забудете вручную обновить пользовательский интерфейс из своего кода.
+
+            // Присваиваем общую ViewModel к viewModel из макета
             viewModel = sharedViewModel
 
-            // Assign the fragment
+            //привязываем переменную flavorFragment из макета к экземпляру фрагмента FlavorFragment для выбора
+            // нужного количества капкейков и перехода на другой экран
             flavorFragment = this@FlavorFragment
         }
     }
 
-    /**
-     * Navigate to the next screen to choose pickup date.
-     */
+    //Перейдите к следующему экрану, чтобы выбрать дату получения.     */
     fun goToNextScreen() {
         findNavController().navigate(R.id.action_flavorFragment_to_pickupFragment)
     }
