@@ -32,9 +32,6 @@ import com.example.cupcakes.model.OrderViewModel
  */
 class SummaryFragment : Fragment() {
 
-    // Binding object instance corresponding to the fragment_summary.xml layout
-    // This property is non-null between the onCreateView() and onDestroyView() lifecycle callbacks,
-    // when the view hierarchy is attached to the fragment.
     private var binding: FragmentSummaryBinding? = null
 
     // Use the 'by activityViewModels()' Kotlin property delegate from the fragment-ktx artifact

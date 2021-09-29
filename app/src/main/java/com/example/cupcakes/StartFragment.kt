@@ -35,7 +35,15 @@ class StartFragment : Fragment() {
     // when the view hierarchy is attached to the fragment.
     private var binding: FragmentStartBinding? = null
 
-    // Use the 'by activityViewModels()' Kotlin property delegate from the fragment-ktx artifact
+    //В Kotlin для каждого var свойства mutable ( ) автоматически создаются функции получения
+    // и установки по умолчанию. Функции установки и получения вызываются, когда вы присваиваете значение или
+    // читаете значение свойства. (Для свойства val, доступного только для чтения ( ), по умолчанию создается только функция получения.
+    // Эта функция получения вызывается, когда вы читаете значение свойства, доступного только для чтения.)
+    //Делегирование свойств в Kotlin помогает передать ответственность за геттер-сеттер другому классу.
+    //Этот класс (называемый классом делегата ) предоставляет функции получения и установки свойства и обрабатывает его изменения.
+
+    // Использование делегата свойства Kotlin 'by activityViewModels ()' из артефакта fragment-ktx
+    //Общая ViewModel. Данную модель мы создаем в каждом фрагменте
     private val sharedViewModel: OrderViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -49,22 +57,24 @@ class StartFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        //привязываем переменную startFragment из макета к экземпляру фрагмента StartFragment
         binding?.startFragment = this
     }
 
     /**
-     * Start an order with the desired quantity of cupcakes and navigate to the next screen.
-     */
+    Начните заказ с желаемого количества кексов и перейдите к следующему экрану     */
     fun orderCupcake(quantity: Int) {
-        // Update the view model with the quantity
+        // обновить количество, прежде чем переходить к фрагменту аромата
         sharedViewModel.setQuantity(quantity)
 
-        // If no flavor is set in the view model yet, select vanilla as default flavor
+        //  установите аромат по умолчанию как Ваниль, если аромат не установлен,
+        //  перед переходом к фрагменту аромата.
         if (sharedViewModel.hasNoFlavorSet()) {
             sharedViewModel.setFlavor(getString(R.string.vanilla))
         }
 
-        // Navigate to the next destination to select the flavor of the cupcakes
+        // Переходим к следующему пункту назначения, чтобы выбрать вкус кексов
+        // Добавляем импорт import androidx.navigation.fragment.findNavController
         findNavController().navigate(R.id.action_startFragment_to_flavorFragment)
     }
 

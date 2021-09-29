@@ -21,45 +21,53 @@ import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
 
-/** Price for a single cupcake */
+//Цена одного кекса
 private const val PRICE_PER_CUPCAKE = 2.00
 
-/** Additional cost for same day pickup of an order */
+//Доплата за получение заказа в тот же день
 private const val PRICE_FOR_SAME_DAY_PICKUP = 3.00
 
 /**
- * [OrderViewModel] holds information about a cupcake order in terms of quantity, flavor, and
- * pickup date. It also knows how to calculate the total price based on these order details.
+ *[OrderViewModel] содержит информацию о заказе кексов с точки зрения количества, вкуса и
+ * подбора даты. Он также знает, как рассчитать общую стоимость на основе этих деталей заказа.
  */
 class OrderViewModel : ViewModel() {
 
-    // Quantity of cupcakes in this order
+    //Количество кексов в заказе
     private val _quantity = MutableLiveData<Int>()
     val quantity: LiveData<Int> = _quantity
 
-    // Cupcake flavor for this order
+    // Вкус кексов для заказа
     private val _flavor = MutableLiveData<String>()
     val flavor: LiveData<String> = _flavor
 
-    // Possible date options
+    // Возможные варианты даты(4 даты):
+    //dateOptions[0]в viewModel(сегодня)
+    // dateOptions[1]в viewModel(завтра)
+    // dateOptions[2]в viewModel(послезавтра)
+    // dateOptions[3] послепослезавтра
     val dateOptions: List<String> = getPickupOptions()
 
-    // Pickup date
+    // Подобрать дату
     private val _date = MutableLiveData<String>()
     val date: LiveData<String> = _date
 
-    // Price of the order so far
+    // Цена заказа на данный момент
+    // Отображается в каждом макете при выборе вкуса, количества и даты доставки
     private val _price = MutableLiveData<Double>()
+    //Делаем цену String, т к будем форматировать ее и возвращать местную валюту($,P,др.)
     val price: LiveData<String> = Transformations.map(_price) {
-        // Format the price into the local currency and return this as LiveData<String>
+        // Форматируем цену в местной валюте и возвращаем ее как LiveData <String>
         NumberFormat.getCurrencyInstance().format(it)
     }
 
+    //Часто требуется выполнять первичную инициализацию объекта при его создании. В Java это обычно
+    //делается в конструкторе. В Kotlin для этого есть блок Init, который будет выполняться при создании
+    //экземпляра OrderViewModel
     init {
-        // Set initial values for the order
+        // Устанавливаем начальные значения для заказа
         resetOrder()
     }
 
@@ -73,34 +81,26 @@ class OrderViewModel : ViewModel() {
         updatePrice()
     }
 
-    /**
-     * Set the flavor of cupcakes for this order. Only 1 flavor can be selected for the whole order.
-     *
-     * @param desiredFlavor is the cupcake flavor as a string
-     */
+    //Установите количество кексов для этого заказа
     fun setFlavor(desiredFlavor: String) {
         _flavor.value = desiredFlavor
     }
 
-    /**
-     * Set the pickup date for this order.
-     *
-     * @param pickupDate is the date for pickup as a string
-     */
+    //Установите дату получения для этого заказа
     fun setDate(pickupDate: String) {
         _date.value = pickupDate
+        //обновляем стоимость в макете в случае выбора заказа на сегодня и добавки на 3 доллара
         updatePrice()
     }
 
     /**
-     * Returns true if a flavor has not been selected for the order yet. Returns false otherwise.
-     */
+    Возвращает true, если аромат еще не выбран для заказа. В противном случае возвращает false.     */
     fun hasNoFlavorSet(): Boolean {
         return _flavor.value.isNullOrEmpty()
     }
 
     /**
-     * Reset the order by using initial default values for the quantity, flavor, date, and price.
+    Сбросьте порядок, используя исходные значения по умолчанию для количества, вкуса, даты и цены.
      */
     fun resetOrder() {
         _quantity.value = 0
@@ -114,7 +114,7 @@ class OrderViewModel : ViewModel() {
      */
     private fun updatePrice() {
         var calculatedPrice = (quantity.value ?: 0) * PRICE_PER_CUPCAKE
-        // If the user selected the first option (today) for pickup, add the surcharge
+// Если пользователь выбрал первый вариант (сегодня) для самовывоза, добавляем надбавку 3 доллара
         if (dateOptions[0] == _date.value) {
             calculatedPrice += PRICE_FOR_SAME_DAY_PICKUP
         }
@@ -122,16 +122,25 @@ class OrderViewModel : ViewModel() {
     }
 
     /**
-     * Returns a list of date options starting with the current date and the following 3 dates.
+    Возвращает список вариантов даты, начиная с текущей даты и следующих 3 дат
      */
     private fun getPickupOptions(): List<String> {
+
         val options = mutableListOf<String>()
+        // В строке шаблона это E означает название дня недели, и выполняется синтаксический анализ
+        // как « Вт, 10 декабря »
         val formatter = SimpleDateFormat("E MMM d", Locale.getDefault())
+        //Получите Calendar экземпляр и назначьте его новой переменной. Сделайте это val. Эта переменная
+        // будет содержать текущую дату и время.
         val calendar = Calendar.getInstance()
+        //Составьте список дат, начиная с текущей даты и следующих трех дат. Поскольку вам понадобится 4 варианта даты,
+        // повторите этот блок кода 4 раза. Этот repeat блок отформатирует дату, добавит ее в список опций даты,
+        // а затем увеличит календарь на 1 день.
         repeat(4) {
             options.add(formatter.format(calendar.time))
             calendar.add(Calendar.DATE, 1)
         }
+        //Возвращаем обновленное options в конце метода
         return options
     }
 }
