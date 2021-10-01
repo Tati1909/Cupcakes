@@ -74,13 +74,13 @@ class FlavorFragment : Fragment() {
     }
 
     /**
-     * Cancel the order and start over.
+    При представлении опций вкуса, если пользователь решает отменить свой заказ, то мы очищаем sharedViewModel,
+    вызвав resetOrder().Затем переходим обратно к StartFragment используя  navigate с идентификатором
+    R.id.action_flavorFragment_to_startFragment.
      */
     fun cancelOrder() {
-        // Reset order in view model
         sharedViewModel.resetOrder()
 
-        // Navigate back to the [StartFragment] to start over
         findNavController().navigate(R.id.action_flavorFragment_to_startFragment)
     }
 

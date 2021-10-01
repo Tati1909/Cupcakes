@@ -57,29 +57,43 @@ class SummaryFragment : Fragment() {
     }
 
     /**
-     * Submit the order by sharing out the order details to another app via an implicit intent.
-     */
+     * Отправьте заказ, поделившись деталями заказа с другим приложением с помощью неявного намерения.
+    !!!! Более подробно смотри 3.4.3.5
+     * */
     fun sendOrder() {
-        // Construct the order summary text with information from the view model
+        //Создаем сводный текст заказа с информацией из ViewModel.
+        //Проще всего сначала вычислить количество из ViewModel и сохранить его в переменной.
+        // Поскольку quantity имеет тип LiveData<Int>,то sharedViewModel.quantity.value может быть null.
+        // Если он равен нулю, используем 0 в качестве значения по умолчанию для numberOfCupcakes.
         val numberOfCupcakes = sharedViewModel.quantity.value ?: 0
+        // Например:
+        //Quantity: 12 cupcakes
+        //Flavor: Chocolate
+        //Pickup date: Sat Dec 12
+        //Total: $24.00
+        //Thank you!
         val orderSummary = getString(
             R.string.order_details,
+            //plurals для ед. и множ. числа: капкейк и капкейки
             resources.getQuantityString(R.plurals.cupcakes, numberOfCupcakes, numberOfCupcakes),
             sharedViewModel.flavor.value.toString(),
             sharedViewModel.date.value.toString(),
             sharedViewModel.price.value.toString()
         )
 
-        // Create an ACTION_SEND implicit intent with order details in the intent extras
+        // Создаем неявное намерение ACTION_SEND с деталями заказа в дополнительных функциях намерения
         val intent = Intent(Intent.ACTION_SEND)
+            //тип(текст, простой)
             .setType("text/plain")
+            //тема сообщения: Новый заказ капкейков
             .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.new_cupcake_order))
+            //тело сообщения
             .putExtra(Intent.EXTRA_TEXT, orderSummary)
 
-        // Check if there's an app that can handle this intent before launching it
+        //Проверяем, есть ли приложение, которое может обработать это намерение, перед его запуском
         if (activity?.packageManager?.resolveActivity(intent, 0) != null) {
-            // Start a new activity with the given intent (this may open the share dialog on a
-            // device if multiple apps can handle this intent)
+            // Запуск Activity с заданным намерением (это может открыть диалоговое окно общего доступа на
+            // устройство, если несколько приложений могут обрабатывать это намерение)
             startActivity(intent)
         }
     }
